@@ -21,7 +21,10 @@ Route::prefix('v1')->group(function (){
         Route::post('refresh',[AuthController::class,'refresh']);
     });
 
+    Route::get('products',[ProductController::class,'index']);
     Route::post('product',[ProductController::class,'store']);
+    Route::get('product/{product}',[ProductController::class,'edit']);
+    Route::post('product/{product}',[ProductController::class,'update']);
 });
 Route::middleware('jwt.auth')->get('/user', function (Request $request) {
     return response()->json($request->user());
