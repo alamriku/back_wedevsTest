@@ -7,6 +7,8 @@ use App\Http\Requests\ProductRequest;
 use App\Models\Product;
 use App\Services\ProductService;
 
+
+
 class ProductController extends Controller
 {
     protected $productService;
@@ -57,6 +59,19 @@ class ProductController extends Controller
             }
             return response()->json(['success' => true, 'message' => 'updated']);
         }
+    }
 
+    public function destroy(Product $product)
+    {
+        try {
+            $this->productService->destroy($product);
+        } catch (\Exception $e) {
+            return response()->json([
+                'exception' => get_class($e),
+                'message' => $e->getMessage(),
+                'trace' => $e->getTrace(),
+            ]);
+        }
+        return response()->json(['success' => true, 'message' => 'deleted']);
     }
 }

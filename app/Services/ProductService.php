@@ -47,11 +47,16 @@ class ProductService
         $property = $this->setter($data);
         if ($file->hasFile('image')) {
             if ($file->file('image')->isValid()) {
+                $this->file->removeFile($file->image);
                 $property['image'] = $this->file->storeFile($file->file('image'));
             }
         }
-
         $model->update($property);
+    }
+
+    public function destroy($model)
+    {
+        $model->delete();
     }
 
 }
