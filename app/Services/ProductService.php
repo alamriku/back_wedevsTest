@@ -16,7 +16,7 @@ class ProductService
 
     public function allProduct()
     {
-        return Product::all();
+        return Product::all(['id','title','description','price']);
     }
 
     public function setter($value)
@@ -33,10 +33,9 @@ class ProductService
     {
         $product = new Product();
         $property = $this->setter($data);
-        if ($request->hasFile('image')) {
-            if ($request->file('image')->isValid()) {
-                $property['image'] = $this->file->storeFile($request->file('image'));
-            }
+        $imageData = $request->get('image');
+        if ($imageData) {
+            $property['image'] = $this->file->storeFile($imageData);
         }
 
         $product->create($property);

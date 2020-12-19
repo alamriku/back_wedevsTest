@@ -7,7 +7,7 @@ use App\Http\Requests\ProductRequest;
 use App\Models\Product;
 use App\Services\ProductService;
 
-
+use Image;
 
 class ProductController extends Controller
 {
@@ -36,7 +36,8 @@ class ProductController extends Controller
                     'trace' => $e->getTrace(),
                 ]);
             }
-            return response()->json(['success' => true, 'message' => 'saved']);
+
+           return response()->json(['success' => true, 'message' => 'saved']);
         }
     }
 

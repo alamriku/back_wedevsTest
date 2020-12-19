@@ -2,14 +2,16 @@
 
 
 namespace App\Services;
-
+use Image;
 
 class FileService
 {
     public function storeFile($data)
     {
-        $fileName = time() . '.' . $data->getClientOriginalExtension();
-        $data->move(public_path() . '/image', $fileName);
+        $imageData = $data;
+        $fileName = uniqid().'.'.explode('/',
+                explode(':', substr($imageData, 0, strpos($imageData, ';')))[1])[1];
+        Image::make($imageData)->save('image/'.$fileName);
         return 'image/' . $fileName;
     }
 
