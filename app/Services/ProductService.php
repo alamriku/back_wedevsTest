@@ -16,7 +16,7 @@ class ProductService
 
     public function allProduct()
     {
-        return Product::all(['id','title','description','price']);
+        return Product::all(['id','title','description','price','image']);
     }
 
     public function setter($value)
@@ -44,11 +44,10 @@ class ProductService
     public function update($data, $file, $model)
     {
         $property = $this->setter($data);
-        if ($file->hasFile('image')) {
-            if ($file->file('image')->isValid()) {
-                $this->file->removeFile($file->image);
-                $property['image'] = $this->file->storeFile($file->file('image'));
-            }
+        $imageData = $file->get('image');
+        if ($imageData) {
+            $this->file->removeFile($model->image);
+            $property['image'] = $this->file->storeFile($imageData);
         }
         $model->update($property);
     }
