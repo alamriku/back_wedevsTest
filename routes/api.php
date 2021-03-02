@@ -26,15 +26,12 @@ Route::prefix('v1')->group(function () {
         Route::get('products', [ProductController::class, 'index']);
         Route::post('product', [ProductController::class, 'store']);
         Route::get('products/{product}', [ProductController::class, 'edit']);
-        Route::PATCH('products/{product}', [ProductController::class, 'update']);
+        Route::patch('products/{product}', [ProductController::class, 'update']);
         Route::delete('products/{product}', [ProductController::class, 'destroy']);
 
         Route::get('expire',[AuthController::class,'getExpireTime']);
     });
 
-});
-Route::middleware('jwt.auth')->get('/user', function (Request $request) {
-    return response()->json($request->user());
 });
 
 

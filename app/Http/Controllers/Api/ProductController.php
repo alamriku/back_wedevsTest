@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductRequest;
 use App\Models\Product;
 use App\Services\ProductService;
+use Illuminate\Http\Request;
 
-use Image;
 
 class ProductController extends Controller
 {
@@ -26,6 +26,7 @@ class ProductController extends Controller
 
     public function store(ProductRequest $request)
     {
+
         if ($request->expectsJson()) {
             try {
                 $this->productService->store($request->all(), $request);
@@ -43,11 +44,12 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
-        return response()->json(['product' => $product]);
+        return response()->json($product);
     }
 
     public function update(ProductRequest $request, Product $product)
     {
+
         if ($request->expectsJson()) {
             try {
                 $this->productService->update($request->all(), $request, $product);

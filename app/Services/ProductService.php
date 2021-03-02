@@ -33,27 +33,29 @@ class ProductService
     {
         $product = new Product();
         $property = $this->setter($data);
-        $imageData = $request->get('image');
-        if ($imageData) {
-            $property['image'] = $this->file->storeFile($imageData);
+        if ($request->hasFile('image')) {
+            $property['image'] = $this->file->storeFile($request);
         }
-
         $product->create($property);
     }
 
-    public function update($data, $file, $model)
+    public function update($data, $request, $model)
     {
         $property = $this->setter($data);
-        $imageData = $file->get('image');
-        if ($imageData) {
-            $this->file->removeFile($model->image);
-            $property['image'] = $this->file->storeFile($imageData);
+        if ($request->hasFile('image')) {
+            if($model->image){
+                $this->file->removeFile($model->image);
+            }
+            $property['image'] = $this->file->storeFile($request);
         }
         $model->update($property);
     }
 
     public function destroy($model)
     {
+        if($model->image){
+            $this->file->removeFile($model->image);
+        }
         $model->delete();
     }
 

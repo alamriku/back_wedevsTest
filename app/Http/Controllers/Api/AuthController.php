@@ -12,11 +12,23 @@ class AuthController extends Controller
     {
         $credentials = $request->only('email', 'password');
         $jwt_token = JWTAuth::attempt($credentials);
-        $user = JWTAuth::user();
-        if ($jwt_token) {
-            return response()->json(['user' => $user,'token'=>$jwt_token], 200)->header('Authorization', $jwt_token);
+
+        if(!$jwt_token){
+            return response()->json(['errors' =>'invalid email or password'],422);
         }
-        return response()->json(['error' => 'login_error'], 401);
+        $data = [
+            'token' => $jwt_token,
+            'token_type' => 'bearer',
+            'expires_in' => JWTAuth::factory()->getTTL() * 60
+        ];
+        $user = JWTAuth::user()->toArray();
+        $data = array_merge($data,$user);
+        return response($data, 200);
+//        if ($jwt_token) {
+//            return response()->json(['user' => $user,'token'=>$jwt_token], 200)->header('Authorization', $jwt_token);
+//        }
+//
+//        return response()->json(['error' => 'login_error'], 401);
     }
     public function getExpireTime()
     {
