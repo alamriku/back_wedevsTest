@@ -3,53 +3,61 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Utilities\ProxyRequest;
 use Illuminate\Http\Request;
-use Tymon\JWTAuth\Facades\JWTAuth;
+use App\Models\User;
 
 class AuthController extends Controller
 {
+    protected $proxy;
+
+    public function __construct(ProxyRequest $proxy)
+    {
+        $this->proxy = $proxy;
+    }
+
     public function login(Request $request)
     {
-        $credentials = $request->only('email', 'password');
-        $jwt_token = JWTAuth::attempt($credentials);
+       $user = User::where('email', $request->email)->first();
+        abort_unless($user, 422, 'This combination does not exists.');
+        abort_unless(
+            \Hash::check(request('password'), $user->password),
+            422,
+            'This combination does not exists.'
+        );
+        $resp = $this->proxy->grantPasswordToken(request('email'), request('password'));
 
-        if(!$jwt_token){
-            return response()->json(['errors' =>'invalid email or password'],422);
-        }
-        $data = [
-            'token' => $jwt_token,
-            'token_type' => 'bearer',
-            'expires_in' => JWTAuth::factory()->getTTL() * 60
-        ];
-        $user = JWTAuth::user()->toArray();
-        $data = array_merge($data,$user);
-        return response($data, 200);
-//        if ($jwt_token) {
-//            return response()->json(['user' => $user,'token'=>$jwt_token], 200)->header('Authorization', $jwt_token);
-//        }
-//
-//        return response()->json(['error' => 'login_error'], 401);
+        return response([
+            'token' => $resp->access_token,
+            'llv' => $resp->refresh_token,
+            'expiresIn' => $resp->expires_in,
+            'message' => 'You have been logged in',
+            'user' => $user
+        ], 200);
     }
-    public function getExpireTime()
+    public function refreshToken()
     {
-        $expire= JWTAuth::parseToken()->getPayload()->get('exp');
-        return response()->json(['expire' => $expire]);
-    }
-    public function logout()
-    {
-        JWTAuth::parseToken()->invalidate();
-        return response()->json([
-            'status' => 'success',
-            'msg' => 'Logged out Successfully.'
+
+        $resp = $this->proxy->refreshAccessToken();
+
+        return response([
+            'token' => $resp->access_token,
+            'expiresIn' => $resp->expires_in,
+            'llv' => $resp->refresh_token,
+            'message' => 'Token has been refreshed.',
         ], 200);
     }
 
-    public function refresh()
+    public function logout()
     {
-        $newToken = JWTAuth::parseToken()->refresh();
-        return response()->json([
-            'status' => 'success',
-            'msg' => $newToken
-        ]);
+        $token = request()->user()->token();
+        $token->delete();
+        // remove the httponly cookie
+        cookie()->queue(cookie()->forget('refresh_token'));
+
+        return response([
+            'message' => 'You have been successfully logged out',
+        ], 200);
     }
+
 }
